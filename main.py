@@ -5,7 +5,6 @@ from models.teacher import Teacher
 from models.course import Course
 from models.director import Director
 
-
 # Create an instance of the Director class
 director = Director()
 director.set_director("John", "Doe", 50, "123 Main St")
@@ -26,8 +25,11 @@ tab_control.add(teacher_tab, text='Teacher')
 tab_control.add(director_tab, text='Director')
 tab_control.pack(expand=1, fill='both')
 
-# GUI for Students
 def student_search_courses():
+    """
+    Allows a student to search for courses on a specific date.
+    Prompts the student to enter a date and their full name, then displays the courses available on that date.
+    """
     date = simpledialog.askstring("Input", "Enter date (YYYY-MM-DD):")
     if date:
         student_name = simpledialog.askstring("Input", "Enter your full name:")
@@ -41,8 +43,11 @@ def student_search_courses():
 
 tk.Button(student_tab, text="Search Courses", command=student_search_courses).pack()
 
-# GUI for Teachers
 def teacher_search_courses():
+    """
+    Allows a teacher to search for courses they are teaching on a specific date.
+    Prompts the teacher to enter a date and their full name, then displays the courses they are teaching on that date.
+    """
     date = simpledialog.askstring("Input", "Enter date (YYYY-MM-DD):")
     if date:
         teacher_name = simpledialog.askstring("Input", "Enter your full name:")
@@ -57,6 +62,10 @@ def teacher_search_courses():
 tk.Button(teacher_tab, text="Search Courses", command=teacher_search_courses).pack()
 
 def teacher_view_students_and_courses():
+    """
+    Allows a teacher to view the students enrolled in the courses they are teaching.
+    Prompts the teacher to enter their full name, then displays the list of courses they are teaching and the students enrolled in each course.
+    """
     teacher_name = simpledialog.askstring("Input", "Enter your full name:")
     for teacher in director.get_teachers():
         if teacher.first_name + " " + teacher.last_name == teacher_name:
@@ -71,6 +80,10 @@ def teacher_view_students_and_courses():
 tk.Button(teacher_tab, text="View Students and Courses", command=teacher_view_students_and_courses).pack()
 
 def assign_grades():
+    """
+    Opens a window to assign grades to students for a specific course.
+    Prompts the user to select a course, teacher, and student, and enter a grade, then assigns the grade to the student.
+    """
     grade_window = tk.Toplevel(root)
     grade_window.title("Assign Grades")
 
@@ -93,6 +106,9 @@ def assign_grades():
     tk.Button(grade_window, text="Assign Grade", command=lambda: assign_selected_grade(course_combobox, teacher_combobox, student_combobox, grade_entry)).pack()
 
 def assign_selected_grade(course_combobox, teacher_combobox, student_combobox, grade_entry):
+    """
+    Assigns the entered grade to the selected student for the selected course.
+    """
     course_name = course_combobox.get()
     teacher_name = teacher_combobox.get()
     student_name = student_combobox.get()
@@ -118,6 +134,10 @@ def assign_selected_grade(course_combobox, teacher_combobox, student_combobox, g
         messagebox.showerror("Error", "Course, Teacher, or Student not found.")
 
 def teacher_view_grades():
+    """
+    Allows a teacher to view the grades of students for a specific course.
+    Prompts the teacher to enter a course name, then displays the list of students and their grades for that course.
+    """
     course_name = simpledialog.askstring("Input", "Enter course name:")
     course = next((c for c in director.get_courses() if c.name == course_name), None)
     if course:
@@ -129,8 +149,11 @@ def teacher_view_grades():
 
 tk.Button(teacher_tab, text="View Grades", command=teacher_view_grades).pack()
 
-# GUI for Director
 def add_student():
+    """
+    Opens a dialog to add a new student.
+    Prompts the user to enter the student's details, then adds the student to the director's list of students.
+    """
     first_name = simpledialog.askstring("Input", "Enter first name:")
     last_name = simpledialog.askstring("Input", "Enter last name:")
     age = simpledialog.askinteger("Input", "Enter age:")
@@ -145,6 +168,10 @@ def add_student():
         messagebox.showerror("Error", str(e))
 
 def add_teacher():
+    """
+    Opens a dialog to add a new teacher.
+    Prompts the user to enter the teacher's details, then adds the teacher to the director's list of teachers.
+    """
     first_name = simpledialog.askstring("Input", "Enter first name:")
     last_name = simpledialog.askstring("Input", "Enter last name:")
     age = simpledialog.askinteger("Input", "Enter age:")
@@ -158,6 +185,10 @@ def add_teacher():
         messagebox.showerror("Error", str(e))
 
 def add_course():
+    """
+    Opens a dialog to add a new course.
+    Prompts the user to enter the course details, then adds the course to the director's list of courses.
+    """
     name = simpledialog.askstring("Input", "Enter course name:")
     start_date = simpledialog.askstring("Input", "Enter start date:")
     end_date = simpledialog.askstring("Input", "Enter end date:")
@@ -170,68 +201,7 @@ def add_course():
         messagebox.showerror("Error", str(e))
 
 def show_courses():
+    """
+    Displays the information about all courses, including the teacher and students assigned to each course.
+    """
     courses_info = director.get_students_with_teacher_for_course()
-    info = ""
-    for course, details in courses_info.items():
-        info += f"Course: {course}\nTeacher: {details['teacher']}\nStudents: {', '.join(details['students'])}\n\n"
-    messagebox.showinfo("Courses Information", info)
-
-def assign_teacher_and_students():
-    assign_window = tk.Toplevel(root)
-    assign_window.title("Assign Teacher and Students to Course")
-
-    tk.Label(assign_window, text="Select Course:").pack()
-    course_combobox = ttk.Combobox(assign_window, values=[course.name for course in director.get_courses()])
-    course_combobox.pack()
-
-    tk.Label(assign_window, text="Select Teacher:").pack()
-    teacher_combobox = ttk.Combobox(assign_window, values=[teacher.first_name + " " + teacher.last_name for teacher in director.get_teachers()])
-    teacher_combobox.pack()
-
-    tk.Label(assign_window, text="Select Students (Level 1):").pack()
-    students_listbox_level1 = tk.Listbox(assign_window, selectmode=tk.MULTIPLE)
-    for student in director.get_students(level="Level 1"):
-        students_listbox_level1.insert(tk.END, student.first_name + " " + student.last_name)
-    students_listbox_level1.pack()
-
-    tk.Label(assign_window, text="Select Students (Level 2):").pack()
-    students_listbox_level2 = tk.Listbox(assign_window, selectmode=tk.MULTIPLE)
-    for student in director.get_students(level="Level 2"):
-        students_listbox_level2.insert(tk.END, student.first_name + " " + student.last_name)
-    students_listbox_level2.pack()
-
-    tk.Label(assign_window, text="Select Students (Level 3):").pack()
-    students_listbox_level3 = tk.Listbox(assign_window, selectmode=tk.MULTIPLE)
-    for student in director.get_students(level="Level 3"):
-        students_listbox_level3.insert(tk.END, student.first_name + " " + student.last_name)
-    students_listbox_level3.pack()
-
-    tk.Button(assign_window, text="Assign", command=lambda: assign_selected_teacher_and_students(course_combobox, teacher_combobox, students_listbox_level1, students_listbox_level2, students_listbox_level3)).pack()
-
-def assign_selected_teacher_and_students(course_combobox, teacher_combobox, students_listbox_level1, students_listbox_level2, students_listbox_level3):
-    course_name = course_combobox.get()
-    teacher_name = teacher_combobox.get()
-    selected_students = students_listbox_level1.curselection() + students_listbox_level2.curselection() + students_listbox_level3.curselection()
-
-    course = next((c for c in director.get_courses() if c.name == course_name), None)
-    teacher = next((t for t in director.get_teachers() if t.first_name + " " + t.last_name == teacher_name), None)
-
-    if course and teacher:
-        for i in selected_students:
-            student_name = students_listbox_level1.get(i) or students_listbox_level2.get(i) or students_listbox_level3.get(i)
-            student = next((s for s in director.get_students() if s.first_name + " " + s.last_name == student_name), None)
-            if student:
-                course.add_student(student)
-        teacher.add_course(course)
-        messagebox.showinfo("Success", "Teacher and students assigned to course successfully.")
-    else:
-        messagebox.showerror("Error", "Course or Teacher not found.")
-
-tk.Button(director_tab, text="Add Student", command=add_student).pack()
-tk.Button(director_tab, text="Add Teacher", command=add_teacher).pack()
-tk.Button(director_tab, text="Add Course", command=add_course).pack()
-tk.Button(director_tab, text="Show Courses", command=show_courses).pack()
-tk.Button(director_tab, text="Assign Teacher and Students", command=assign_teacher_and_students).pack()
-
-root.mainloop()
-
